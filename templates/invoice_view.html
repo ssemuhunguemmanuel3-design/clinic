@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row noprint"><h2>Invoice {{ inv.number }}</h2><button onclick="window.print()">Print</button></div>
+<div class="card col">
+  <h3 class="onlyprint">{{ clinic_name }}</h3>
+  <div><b>Patient:</b> {{ inv.patient_name }} {{ '· ' ~ pt.phone if pt.phone }}</div>
+  <div><b>Date:</b> {{ inv.created_at }} · <span class="tag {{ inv.status }}">{{ inv.status }}</span></div>
+  <table>
+    <tr><th>Description</th><th class="r">Amount</th></tr>
+    {% for it in inv.items %}<tr><td>{{ it.desc }}</td><td class="r">{{ it.amount|money }}</td></tr>{% endfor %}
+    <tr><td><b>Total</b></td><td class="r"><b>{{ inv.total|money }}</b></td></tr>
+    <tr><td>Paid</td><td class="r">{{ inv.paid|money }}</td></tr>
+    <tr><td><b>Balance due</b></td><td class="r"><b>{{ (inv.total - inv.paid)|money }}</b></td></tr>
+  </table>
+</div>
+
+<h3>Payments</h3>
+<table>
+  <tr><th>Date</th><th>Method</th><th>Received by</th><th class="r">Amount</th></tr>
+  {% for p in inv.payments %}<tr><td>{{ p.date }}</td><td>{{ p.method }}</td><td>{{ p.by }}</td><td class="r">{{ p.amount|money }}</td></tr>
+  {% else %}<tr><td colspan="4">No payments yet.</td></tr>{% endfor %}
+</table>
+
+{% if inv.status != 'paid' %}
+<form method="post" action="{{ url_for('invoice_pay', iid=inv._id) }}" class="card noprint">
+  <input name="amount" type="number" step="0.01" min="0.01" value="{{ '%.2f'|format(inv.total - inv.paid) }}" required>
+  <select name="method"><option>cash</option><option>card</option><option>mobile money</option><option>insurance</option></select>
+  <button>Record payment</button>
+</form>
+{% endif %}
+
+{% if session.user.role == 'admin' %}
+<form method="post" action="{{ url_for('invoice_delete', iid=inv._id) }}" class="noprint" onsubmit="return confirm('Delete this invoice?')"><button class="danger">Delete invoice</button></form>
+{% endif %}
+{% endblock %}

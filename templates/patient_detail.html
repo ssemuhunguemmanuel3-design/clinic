@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+{% set role = session.user.role %}
+<div class="row">
+  <h2>{{ p.name }}</h2>
+  <span>
+    <a class="btn" href="{{ url_for('patient_edit', pid=p._id) }}">Edit</a>
+    <a class="btn" href="{{ url_for('appointments_list', patient=p._id) }}">Book appointment</a>
+    {% if role in ('admin','receptionist') %}<a class="btn" href="{{ url_for('invoice_new', patient=p._id) }}">New invoice</a>{% endif %}
+  </span>
+</div>
+
+<div class="card info">
+  <div><b>Age:</b> {{ p.dob|age }} ({{ p.dob }})</div>
+  <div><b>Gender:</b> {{ p.gender }}</div>
+  <div><b>Phone:</b> {{ p.phone }}</div>
+  <div><b>Email:</b> {{ p.email }}</div>
+  <div><b>Address:</b> {{ p.address }}</div>
+  <div><b>Blood group:</b> {{ p.blood_group }}</div>
+  <div><b>Allergies:</b> <span class="bad">{{ p.allergies or 'None recorded' }}</span></div>
+  <div><b>Emergency contact:</b> {{ p.emergency_contact }}</div>
+  <div class="wide"><b>Notes:</b> {{ p.notes }}</div>
+</div>
+
+{% if can_clinical %}
+<h3>Medical records</h3>
+<form method="post" action="{{ url_for('visit_add', pid=p._id) }}" class="card grid">
+  <label class="wide">Complaint / symptoms<input name="complaint" required></label>
+  <label>Blood pressure<input name="bp" placeholder="120/80"></label>
+  <label>Temperature (°C)<input name="temp"></label>
+  <label>Weight (kg)<input name="weight"></label>
+  <label>Diagnosis<input name="diagnosis"></label>
+  <label class="wide">Treatment<textarea name="treatment" rows="2"></textarea></label>
+  <label class="wide">Prescription<textarea name="prescription" rows="2"></textarea></label>
+  <div class="wide"><button>Save visit</button></div>
+</form>
+{% for v in visits %}
+<div class="card visit">
+  <div class="row"><b>{{ v.date }}</b> <span>Dr. {{ v.doctor_name }}</span></div>
+  <div><b>Complaint:</b> {{ v.complaint }}</div>
+  <div><b>Vitals:</b> BP {{ v.bp or '-' }} · Temp {{ v.temp or '-' }} · Weight {{ v.weight or '-' }}</div>
+  <div><b>Diagnosis:</b> {{ v.diagnosis }}</div>
+  <div><b>Treatment:</b> {{ v.treatment }}</div>
+  <div><b>Prescription:</b> {{ v.prescription }}</div>
+  {% if role == 'admin' %}
+  <form method="post" action="{{ url_for('visit_delete', vid=v._id) }}" onsubmit="return confirm('Delete this visit?')"><button class="danger small">Delete</button></form>
+  {% endif %}
+</div>
+{% else %}<p>No visits recorded yet.</p>{% endfor %}
+{% endif %}
+
+<h3>Appointments</h3>
+<table>
+  <tr><th>Date</th><th>Time</th><th>Doctor</th><th>Reason</th><th>Status</th></tr>
+  {% for a in appts %}
+  <tr><td>{{ a.date }}</td><td>{{ a.time }}</td><td>{{ a.doctor_name }}</td><td>{{ a.reason }}</td><td><span class="tag {{ a.status }}">{{ a.status }}</span></td></tr>
+  {% else %}<tr><td colspan="5">None.</td></tr>{% endfor %}
+</table>
+
+{% if role in ('admin','receptionist') %}
+<h3>Invoices</h3>
+<table>
+  <tr><th>No.</th><th>Date</th><th>Total</th><th>Paid</th><th>Status</th></tr>
+  {% for i in invs %}
+  <tr><td><a href="{{ url_for('invoice_view', iid=i._id) }}">{{ i.number }}</a></td><td>{{ i.created_at }}</td>
+      <td>{{ i.total|money }}</td><td>{{ i.paid|money }}</td><td><span class="tag {{ i.status }}">{{ i.status }}</span></td></tr>
+  {% else %}<tr><td colspan="5">None.</td></tr>{% endfor %}
+</table>
+{% endif %}
+
+{% if role == 'admin' %}
+<form method="post" action="{{ url_for('patient_delete', pid=p._id) }}" onsubmit="return confirm('Delete this patient and ALL their records? This cannot be undone.')">
+  <button class="danger">Delete patient</button>
+</form>
+{% endif %}
+{% endblock %}

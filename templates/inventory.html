@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Pharmacy &amp; supplies</h2>
+{% if session.user.role in ('admin','receptionist') %}
+<form class="card" method="post" action="{{ url_for('inventory_add') }}">
+  <input name="name" placeholder="Item name" required>
+  <input name="category" placeholder="Category">
+  <input name="qty" type="number" min="0" placeholder="Quantity" required>
+  <input name="reorder" type="number" min="0" placeholder="Reorder level" value="10">
+  <input name="price" type="number" step="0.01" min="0" placeholder="Unit price">
+  <button>Add item</button>
+</form>
+{% endif %}
+<form method="get" class="card"><input name="q" value="{{ q }}" placeholder="Search items"><button>Search</button></form>
+<table>
+  <tr><th>Item</th><th>Category</th><th>In stock</th><th>Reorder at</th><th>Price</th><th>Adjust stock</th><th></th></tr>
+  {% for i in items %}
+  <tr>
+    <td>{{ i.name }}</td><td>{{ i.category }}</td>
+    <td class="{{ 'bad' if i.qty <= i.reorder }}">{{ i.qty }}</td><td>{{ i.reorder }}</td><td>{{ i.price|money }}</td>
+    <td>
+      <form method="post" action="{{ url_for('inventory_adjust', iid=i._id) }}" class="inline">
+        <input name="delta" type="number" placeholder="+/-" style="width:70px" required><button class="small">Apply</button>
+      </form>
+    </td>
+    <td>
+      {% if session.user.role == 'admin' %}
+      <form method="post" action="{{ url_for('inventory_delete', iid=i._id) }}" class="inline" onsubmit="return confirm('Delete item?')"><button class="danger small">✕</button></form>
+      {% endif %}
+    </td>
+  </tr>
+  {% else %}<tr><td colspan="7">No items.</td></tr>{% endfor %}
+</table>
+<p class="muted">Use a negative number to dispense/remove stock (e.g. -5), positive to restock.</p>
+{% endblock %}

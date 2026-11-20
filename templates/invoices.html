@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row"><h2>Billing</h2><a class="btn" href="{{ url_for('invoice_new') }}">+ New invoice</a></div>
+<p>
+  <a href="{{ url_for('invoices_list') }}">All</a> ·
+  <a href="{{ url_for('invoices_list', status='unpaid') }}">Unpaid</a> ·
+  <a href="{{ url_for('invoices_list', status='partial') }}">Partial</a> ·
+  <a href="{{ url_for('invoices_list', status='paid') }}">Paid</a>
+</p>
+<table>
+  <tr><th>No.</th><th>Date</th><th>Patient</th><th>Total</th><th>Paid</th><th>Balance</th><th>Status</th></tr>
+  {% for i in invs %}
+  <tr>
+    <td><a href="{{ url_for('invoice_view', iid=i._id) }}">{{ i.number }}</a></td>
+    <td>{{ i.created_at }}</td><td>{{ i.patient_name }}</td>
+    <td>{{ i.total|money }}</td><td>{{ i.paid|money }}</td><td>{{ (i.total - i.paid)|money }}</td>
+    <td><span class="tag {{ i.status }}">{{ i.status }}</span></td>
+  </tr>
+  {% else %}<tr><td colspan="7">No invoices.</td></tr>{% endfor %}
+</table>
+{% endblock %}

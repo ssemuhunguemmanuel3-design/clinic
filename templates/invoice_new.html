@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>New invoice</h2>
+<form method="post" class="card col">
+  <select name="patient_id" required>
+    <option value="">Patient…</option>
+    {% for p in pts %}<option value="{{ p._id }}" {{ 'selected' if selected == p._id|string }}>{{ p.name }}</option>{% endfor %}
+  </select>
+  <div id="rows">
+    <div class="line"><input name="desc" placeholder="Service / item (e.g. Consultation)"><input name="amt" type="number" step="0.01" min="0" placeholder="Amount"></div>
+  </div>
+  <div><button type="button" onclick="addRow()">+ Add line</button></div>
+  <div><button>Create invoice</button></div>
+</form>
+<script>
+function addRow() {
+  const d = document.createElement('div');
+  d.className = 'line';
+  d.innerHTML = '<input name="desc" placeholder="Service / item"><input name="amt" type="number" step="0.01" min="0" placeholder="Amount">';
+  document.getElementById('rows').appendChild(d);
+}
+</script>
+{% endblock %}

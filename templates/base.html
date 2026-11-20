@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ clinic_name }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  {% set user = session.get('user') %}
+  {% if user %}
+  <nav class="noprint">
+    <strong>{{ clinic_name }}</strong>
+    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('patients_list') }}">Patients</a>
+    <a href="{{ url_for('appointments_list') }}">Appointments</a>
+    {% if user.role in ('admin','receptionist') %}<a href="{{ url_for('invoices_list') }}">Billing</a>{% endif %}
+    <a href="{{ url_for('inventory_list') }}">Pharmacy</a>
+    {% if user.role == 'admin' %}<a href="{{ url_for('staff_list') }}">Staff</a>{% endif %}
+    <span class="spacer"></span>
+    <a href="{{ url_for('change_password') }}">{{ user.name }} ({{ user.role }})</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </nav>
+  {% endif %}
+  <main>
+    {% for m in get_flashed_messages() %}<div class="flash noprint">{{ m }}</div>{% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

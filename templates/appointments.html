@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Appointments</h2>
+
+<form class="card" method="post" action="{{ url_for('appointment_add') }}">
+  <select name="patient_id" required>
+    <option value="">Patient…</option>
+    {% for p in pts %}<option value="{{ p._id }}" {{ 'selected' if selected == p._id|string }}>{{ p.name }}</option>{% endfor %}
+  </select>
+  <select name="doctor_id" required>
+    <option value="">Doctor…</option>
+    {% for d in doctors %}<option value="{{ d._id }}">Dr. {{ d.name }}</option>{% endfor %}
+  </select>
+  <input name="date" type="date" required>
+  <input name="time" type="time" required>
+  <input name="reason" placeholder="Reason for visit">
+  <button>Book</button>
+</form>
+
+<form class="card" method="get">
+  <input name="date" type="date" value="{{ d }}">
+  <select name="doctor">
+    <option value="">All doctors</option>
+    {% for x in doctors %}<option value="{{ x._id }}" {{ 'selected' if doc == x._id|string }}>Dr. {{ x.name }}</option>{% endfor %}
+  </select>
+  <button>Filter</button> <a href="{{ url_for('appointments_list') }}">Clear</a>
+</form>
+
+<table>
+  <tr><th>Date</th><th>Time</th><th>Patient</th><th>Doctor</th><th>Reason</th><th>Status</th><th></th></tr>
+  {% for a in appts %}
+  <tr>
+    <td>{{ a.date }}</td><td>{{ a.time }}</td>
+    <td><a href="{{ url_for('patient_detail', pid=a.patient_id) }}">{{ a.patient_name }}</a></td>
+    <td>{{ a.doctor_name }}</td><td>{{ a.reason }}</td>
+    <td>
+      <form method="post" action="{{ url_for('appointment_status', aid=a._id) }}" class="inline">
+        <select name="status" onchange="this.form.submit()">
+          {% for s in statuses %}<option {{ 'selected' if a.status == s }}>{{ s }}</option>{% endfor %}
+        </select>
+      </form>
+    </td>
+    <td>
+      {% if session.user.role in ('admin','receptionist') %}
+      <form method="post" action="{{ url_for('appointment_delete', aid=a._id) }}" class="inline" onsubmit="return confirm('Delete appointment?')"><button class="danger small">✕</button></form>
+      {% endif %}
+    </td>
+  </tr>
+  {% else %}<tr><td colspan="7">No appointments found.</td></tr>{% endfor %}
+</table>
+{% endblock %}

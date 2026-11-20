@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Dashboard</h2>
+<div class="stats">
+  <div class="stat"><span>{{ n_patients }}</span>Patients</div>
+  <div class="stat"><span>{{ today_appts|length }}</span>Appointments today</div>
+  <div class="stat"><span>{{ revenue_today|money }}</span>Collected today</div>
+  <div class="stat"><span>{{ outstanding|money }}</span>Outstanding balance</div>
+</div>
+
+<h3>Today's appointments ({{ today }})</h3>
+<table>
+  <tr><th>Time</th><th>Patient</th><th>Doctor</th><th>Reason</th><th>Status</th></tr>
+  {% for a in today_appts %}
+  <tr>
+    <td>{{ a.time }}</td>
+    <td><a href="{{ url_for('patient_detail', pid=a.patient_id) }}">{{ a.patient_name }}</a></td>
+    <td>{{ a.doctor_name }}</td><td>{{ a.reason }}</td><td><span class="tag {{ a.status }}">{{ a.status }}</span></td>
+  </tr>
+  {% else %}<tr><td colspan="5">Nothing scheduled today.</td></tr>{% endfor %}
+</table>
+
+<h3>Low stock</h3>
+<table>
+  <tr><th>Item</th><th>In stock</th><th>Reorder level</th></tr>
+  {% for i in low_stock %}<tr><td>{{ i.name }}</td><td class="bad">{{ i.qty }}</td><td>{{ i.reorder }}</td></tr>
+  {% else %}<tr><td colspan="3">All items are well stocked.</td></tr>{% endfor %}
+</table>
+{% endblock %}

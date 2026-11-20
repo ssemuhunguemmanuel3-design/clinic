@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Staff</h2>
+<form class="card" method="post" action="{{ url_for('staff_add') }}">
+  <input name="name" placeholder="Full name" required>
+  <input name="username" placeholder="Username" required>
+  <input name="password" type="password" placeholder="Password (6+)" required>
+  <select name="role"><option>doctor</option><option>receptionist</option><option>admin</option></select>
+  <button>Add staff</button>
+</form>
+<table>
+  <tr><th>Name</th><th>Username</th><th>Role</th><th></th></tr>
+  {% for s in staff %}
+  <tr><td>{{ s.name }}</td><td>{{ s.username }}</td><td>{{ s.role }}</td>
+    <td><form method="post" action="{{ url_for('staff_delete', uid=s._id) }}" class="inline" onsubmit="return confirm('Delete this staff member?')"><button class="danger small">Delete</button></form></td></tr>
+  {% endfor %}
+</table>
+<p class="muted">Doctor: patients, medical records, appointments, pharmacy. Receptionist: patients (no medical records), appointments, billing, pharmacy. Admin: everything.</p>
+{% endblock %}
