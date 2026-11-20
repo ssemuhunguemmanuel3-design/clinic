@@ -5,4 +5,7 @@ CLINIC APP (Python Flask + MongoDB Atlas)
 4. Open http://127.0.0.1:5000 and log in as admin.
 Deploy: push to GitHub, create a Render Web Service,
 Build: pip install -r requirements.txt   Start: gunicorn app:app
-Env vars: MONGO_URI, DB_NAME, SECRET_KEY, ADMIN_PASSWORD, CLINIC_NAME
+user name: admin
+password: Admin2026Pass
+with the above details, the clinic project opens successfully
+thankyou
